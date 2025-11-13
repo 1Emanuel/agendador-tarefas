@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,7 @@ public class TarefasService {
     private final TarefasCoverter tarefasCoverter;
     private final JwtUtil jwtUtil;
 
+    // criar metodo para criar terefa
     public TarefasDTO criarTarefa(TarefasDTO dto, String token) {
         String email = jwtUtil.extrairEmailToken(token.substring(7)); // extrair o emial do usuario no token
         dto.setDataCriacao(LocalDateTime.now()); // setar o status quando criar a tarefa
@@ -25,6 +27,16 @@ public class TarefasService {
         dto.setEmailUsuario(email); // setar o email do usuario extraido no token
         TarefasEntity tarefa = tarefasCoverter.paraTarefasEntity(dto); // coverter o DTO para Entity
         return tarefasCoverter.paraTarefaDTO(tarefasRepository.save(tarefa)); // Salvar a Entity e coverter para DTO e retornar o DTO
+    }
+
+    // criar o metod que busca lista de tarefas basedo no perido
+    public List<TarefasDTO> buscarTarefasAgendadasPorPeriodo(LocalDateTime dataInicial, LocalDateTime dataFinal) {
+        return tarefasCoverter.paraListaTarefasDTO(tarefasRepository.findByDataEventoBetween(dataInicial, dataFinal));
+    }
+
+    public List<TarefasDTO> buscarTarefasPorEmail(String token) {
+        String email = jwtUtil.extrairEmailToken(token.substring(7));
+        return tarefasCoverter.paraListaTarefasDTO(tarefasRepository.findByEmailUsuario(email));
     }
 
 
